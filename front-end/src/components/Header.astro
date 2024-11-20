@@ -1,0 +1,46 @@
+<!-- src/components/Header.astro -->
+<header class="header">
+  <div class="header-content">
+    <h1 class="site-name">Al-nasih</h1>
+    <nav class="navigation">
+      <a href="#">Home</a>
+      <a href="#">About Us</a>
+      <a href="#">Subscriptions</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    width: 100%;
+    padding: 10px 10px; /* Initial padding */
+    background: rgba(215, 169, 0, 0.7); /* Semi-transparent background */
+    color: white;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px); /* Glassy blur effect */
+    transition: padding 0.3s ease; /* Transition for smooth sliding */
+  }
+  .header:hover {
+    padding: 20px 40px; /* Increased padding on hover */
+  }
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 40px;
+    padding-right: 20px;
+  }
+  .site-name {
+    font-size: 1.5em; /* Adjust font size as needed */
+    margin: 0;
+  }
+  .navigation a {
+    margin: 0 10px;
+    color: white;
+    text-decoration: none;
+  }
+  .year {
+    margin-left: 20px;
+  }
+</style>

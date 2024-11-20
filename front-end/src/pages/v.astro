@@ -1,0 +1,96 @@
+---
+// front-end/src/pages/v.astro
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout title="Valuate Page">
+  <Header />
+  <main>
+    <div class="box">
+      <input type="text" class="id-input" placeholder="Enter ID number" />
+      <button class="valuate-button">Valuate</button>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  :root {
+    --primary-color: #4a90e2;
+    --primary-hover-color: #357ab8;
+    --background-color: #f7f9fc;
+    --box-shadow-color: rgba(0, 0, 0, 0.1);
+    --input-border-color: #d1d9e6;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #e0eafc, #cfdef3);
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    padding: 20px;
+  }
+
+  .box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 320px;
+    padding: 30px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px var(--box-shadow-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px var(--box-shadow-color);
+  }
+
+  .id-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    font-size: 16px;
+    border: 1px solid var(--input-border-color);
+    border-radius: 6px;
+    transition: border-color 0.3s ease;
+  }
+
+  .id-input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+  }
+
+  .valuate-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    background-color: var(--primary-color);
+    color: white;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+
+  .valuate-button:hover {
+    background-color: var(--primary-hover-color);
+    transform: translateY(-2px);
+  }
+</style>

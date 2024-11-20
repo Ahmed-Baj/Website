@@ -1,0 +1,167 @@
+<!-- src/pages/Map.astro -->
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Map Page">
+  <Header /> <!-- Added Header component -->
+  <div class="map-container">
+    <div id="map" class="map-preview"></div> <!-- Mapbox container -->
+    <div class="filters">
+      <h2>Filters</h2>
+      <div class="filter-option">
+        <label for="rooms">Number of Rooms:</label>
+        <select id="rooms">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4+</option>
+        </select>
+      </div>
+      <div class="filter-option">
+        <label for="area">Area Size (sq ft):</label>
+        <input type="number" id="area" placeholder="Enter area size" />
+      </div>
+      <div class="filter-option">
+        <label for="price">Max Price:</label>
+        <input type="number" id="price" placeholder="Enter max price" />
+      </div>
+      <div class="button-container">
+        <button class="apply-filters">Apply Filters</button>
+      </div>
+    </div>
+  </div>
+  <Footer /> <!-- Added Footer component -->
+</Layout>
+
+<style>
+  body {
+    margin: 0; /* Remove default margin */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    font-family: 'Arial', sans-serif; /* Modern font */
+    background-color: #f0f0f0; /* Light gray background for the entire page */
+  }
+  .map-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%; /* Full width */
+    min-height: 100vh; /* Ensure it covers the full height of the viewport */
+    margin: 20px; /* Remove margin */
+  }
+  .map-preview {
+    width: 100%; /* Full width */
+    max-width: 1200px; /* Increased max-width */
+    height: 600px; /* Set height for the map */
+    margin-bottom: 20px;
+    border: 1px solid #ddd; /* Thin border around the map */
+    border-radius: 15px; /* Rounded corners */
+    overflow: hidden; /* Ensure the border radius is applied to the iframe */
+  }
+  .filters {
+    width: 100%;
+    max-width: 800px; /* Adjust as needed */
+    background-color: #ffffff; /* White background for filters section */
+    padding: 30px; /* Increased padding */
+    border-radius: 15px; /* More rounded corners */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); /* Enhanced shadow */
+    transition: box-shadow 0.3s ease; /* Smooth shadow transition */
+  }
+  .filters:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2); /* Darker shadow on hover */
+  }
+  .filter-option {
+    margin-bottom: 20px; /* Increased spacing */
+    display: flex; /* Align label and input */
+    align-items: center; /* Center vertically */
+  }
+  .filter-option label {
+    margin-right: 15px; /* Increased margin */
+    font-weight: 600; /* Slightly bolder labels */
+    color: #555; /* Darker text color */
+    flex: 1; /* Allow label to take space */
+  }
+  .filter-option select,
+  .filter-option input {
+    padding: 12px; /* Increased padding for inputs */
+    border: 1px solid #ddd; /* Light border */
+    border-radius: 10px; /* Rounded corners */
+    width: 70%; /* Increased width for better spacing */
+    transition: border-color 0.3s ease; /* Smooth border transition */
+  }
+  .filter-option select:focus,
+  .filter-option input:focus {
+    border-color: #007bff; /* Change border color on focus */
+    outline: none; /* Remove default outline */
+  }
+  .button-container {
+    display: flex; /* Use flexbox to center the button */
+    justify-content: center; /* Center the button horizontally */
+    margin-top: 20px; /* Add some space above the button */
+  }
+  .apply-filters {
+    padding: 14px 24px; /* Increased padding */
+    background-color: #007bff; /* Primary color */
+    color: white;
+    border: none;
+    border-radius: 10px; /* Rounded corners */
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth background transition */
+    font-weight: bold; /* Bold text */
+  }
+  .apply-filters:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+  }
+</style>
+
+<!-- Include Mapbox CSS and JS -->
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css' rel='stylesheet' />
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js'></script>
+
+<script>
+  // Initialize the Mapbox map
+  mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN'; // Replace with your Mapbox access token
+  const map = new mapboxgl.Map({
+    container: 'map', // ID of the container
+    style: 'mapbox://styles/mapbox/streets-v11', // Map style
+    center: [144.953735, -37.816279], // Starting position [lng, lat]
+    zoom: 12 // Starting zoom level
+  });
+
+  // Fetch the GeoJSON data
+  fetch('front-end/src/data/riyadh.geojson') // Adjust the path based on your project structure
+    .then(response => response.json())
+    .then(geoData => {
+      // Add the geoJSON data to the map
+      map.on('load', () => {
+        map.addSource('geoData', {
+          'type': 'geojson',
+          'data': geoData
+        });
+
+        // Add a layer to display the GeoJSON points
+        map.addLayer({
+          'id': 'geo-points',
+          'type': 'circle',
+          'source': 'geoData',
+          'paint': {
+            'circle-radius': 6,
+            'circle-color': '#007bff'
+          }
+        });
+      });
+    })
+    .catch(error => console.error('Error loading the GeoJSON data:', error));
+
+  // Fetch the JSON data
+  fetch('front-end/src/data/riyadh_districts.json') // Adjust the path based on your project structure
+    .then(response => response.json())
+    .then(jsonData => {
+      // Use the JSON data as needed
+      console.log(jsonData); // Example: log the JSON data to the console
+      // You can implement additional logic here to filter or manipulate the map based on this data
+    })
+    .catch(error => console.error('Error loading the JSON data:', error));
+</script>
