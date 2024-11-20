@@ -8,7 +8,10 @@ import Layout from '../layouts/Layout.astro';
 <Layout title="Map Page">
   <Header /> <!-- Added Header component -->
   <div class="map-container">
-    <div id="map" class="map-preview"></div> <!-- Mapbox container -->
+    <div class="map-preview">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.835434509198!2d144.9537353153164!3d-37.81627997975157!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642af0f11f1b3%3A0x5045675218ceed0!2sMelbourne%20CBD%2C%20Victoria%2C%20Australia!5e0!3m2!1sen!2sus!4v1633031234567!5m2!1sen!2sus" 
+              width="100%" height="600" style="border:0; border-radius: 15px;" allowfullscreen="" loading="lazy"></iframe>
+    </div>
     <div class="filters">
       <h2>Filters</h2>
       <div class="filter-option">
@@ -37,7 +40,9 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <style>
-  body {
+  html, body {
+    height: 100%; /* Ensure full height */
+    width: 100%;
     margin: 0; /* Remove default margin */
     overflow-x: hidden; /* Prevent horizontal scrolling */
     font-family: 'Arial', sans-serif; /* Modern font */
@@ -54,11 +59,16 @@ import Layout from '../layouts/Layout.astro';
   .map-preview {
     width: 100%; /* Full width */
     max-width: 1200px; /* Increased max-width */
-    height: 600px; /* Set height for the map */
     margin-bottom: 20px;
-    border: 1px solid #ddd; /* Thin border around the map */
+    display: flex; /* Center the iframe */
+    justify-content: center; /* Center the iframe */
+    border: 5px solid #a3a3a3; /* Thin border around the map */
     border-radius: 15px; /* Rounded corners */
     overflow: hidden; /* Ensure the border radius is applied to the iframe */
+  }
+  .map-preview iframe {
+    border: 0; /* Remove default iframe border */
+    border-radius: 15px; /* Match the border radius */
   }
   .filters {
     width: 100%;
@@ -115,53 +125,3 @@ import Layout from '../layouts/Layout.astro';
     background-color: #0056b3; /* Darker shade on hover */
   }
 </style>
-
-<!-- Include Mapbox CSS and JS -->
-<link href='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css' rel='stylesheet' />
-<script src='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js'></script>
-
-<script>
-  // Initialize the Mapbox map
-  mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN'; // Replace with your Mapbox access token
-  const map = new mapboxgl.Map({
-    container: 'map', // ID of the container
-    style: 'mapbox://styles/mapbox/streets-v11', // Map style
-    center: [144.953735, -37.816279], // Starting position [lng, lat]
-    zoom: 12 // Starting zoom level
-  });
-
-  // Fetch the GeoJSON data
-  fetch('front-end/src/data/riyadh.geojson') // Adjust the path based on your project structure
-    .then(response => response.json())
-    .then(geoData => {
-      // Add the geoJSON data to the map
-      map.on('load', () => {
-        map.addSource('geoData', {
-          'type': 'geojson',
-          'data': geoData
-        });
-
-        // Add a layer to display the GeoJSON points
-        map.addLayer({
-          'id': 'geo-points',
-          'type': 'circle',
-          'source': 'geoData',
-          'paint': {
-            'circle-radius': 6,
-            'circle-color': '#007bff'
-          }
-        });
-      });
-    })
-    .catch(error => console.error('Error loading the GeoJSON data:', error));
-
-  // Fetch the JSON data
-  fetch('front-end/src/data/riyadh_districts.json') // Adjust the path based on your project structure
-    .then(response => response.json())
-    .then(jsonData => {
-      // Use the JSON data as needed
-      console.log(jsonData); // Example: log the JSON data to the console
-      // You can implement additional logic here to filter or manipulate the map based on this data
-    })
-    .catch(error => console.error('Error loading the JSON data:', error));
-</script>
