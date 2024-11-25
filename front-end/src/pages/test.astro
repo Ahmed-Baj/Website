@@ -1,0 +1,60 @@
+---
+// Page.astro
+---
+<html>
+  <head>
+    <title>Choropleth Map Visualization</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  </head>
+  <body>
+    <div id="map" style="width:100%; height:600px;"></div>
+    <script is:inline>
+      // Client-side JavaScript
+      async function fetchAndProcessData() {
+        // Fetch GeoJSON data
+        const mapResponse = await fetch("../data/riyadh.geojson");
+        const mapData = await mapResponse.json();
+
+        // Fetch neighborhood JSON data
+        const neighborhoodResponse = await fetch("../data/riyadh_districts.json");
+        const neighborhoodData = await neighborhoodResponse.json();
+
+        // Fetch apartments CSV data
+        const apartmentsResponse = await fetch("../data/apartments_sale_east_riyadh_cleaned.csv");
+        const apartmentsCsv = await apartmentsResponse.text();
+        const apartmentsData = d3.csvParse(apartmentsCsv);
+
+        // Process data (merge and group by district)
+        // ... (Implement data processing logic here)
+
+        // Prepare data for Plotly
+        const plotData = {
+          type: 'choropleth',
+          geojson: mapData,
+          locations: /* Array of district names */,
+          z: /* Array of values for coloring */,
+          colorscale: 'darkmint',
+          marker: { opacity: 0.3 },
+          hoverinfo: 'text',
+          hovertext: /* Hover data */,
+        };
+
+        // Layout configuration
+        const layout = {
+          title: 'متوسط أسعار الشقق حسب الحي (الرياض)',
+          geo: {
+            center: { lat: 24.79, lon: 46.70 },
+            zoom: 8,
+          },
+          mapbox: { style: 'carto-positron' },
+        };
+
+        // Create the plot
+        Plotly.newPlot('map', [plotData], layout);
+      }
+
+      // Run after the page has loaded
+      document.addEventListener('DOMContentLoaded', fetchAndProcessData);
+    </script>
+  </body>
+</html>
