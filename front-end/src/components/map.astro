@@ -1,0 +1,138 @@
+---
+import React, { useEffect } from 'react';
+import * as L from 'leaflet';
+import geojsonData from './data/riyadh.geojson';
+import Papa from 'papaparse';
+
+// Ensure leaflet CSS is imported if not already done
+import 'leaflet/dist/leaflet.css';
+
+interface AvgPrice {
+  district: string;
+  avgPrice: number;
+}
+
+const processData = async (): Promise<{ avgPrices: AvgPrice[] }> => {
+    try {
+      // 1. Load Data
+      const [geoJsonResponse, apartmentsResponse, districtsResponse] = await Promise.all([
+        fetch('/data/riyadh.geojson'),
+        fetch('/data/apartments_sale_riyadh_cleaned.csv'),
+        fetch('/data/riyadh_districts.json'),
+      ]);
+  
+      if (!geoJsonResponse.ok || !apartmentsResponse.ok || !districtsResponse.ok ) {
+          throw new Error(`HTTP error! geojson: ${geoJsonResponse.status}, apartments: ${apartmentsResponse.status}, districts: ${districtsResponse.status}`);
+      }
+  
+      const geojsonData = await geoJsonResponse.json();
+      const districtsData = await districtsResponse.json();
+  
+      const apartmentsData = await new Promise((resolve, reject) => {
+          Papa.parse(apartmentsResponse.body, {
+            header: true,
+            dynamicTyping: true,
+            complete: results => {
+                if (results.errors.length > 0) {
+                    reject(new Error(`CSV parsing error: ${results.errors[0].message}`));
+                } else {
+                  resolve(results.data);
+                }
+            },
+            error: err => {
+                reject(err);
+            }
+          });
+      });
+  
+      // 2. Data Preprocessing of apartments
+        const districtsAvgPrices  = {};
+        apartmentsData.forEach(apt => {
+            const district = apt.district.trim();
+            if (!districtsAvgPrices[district]) {
+              districtsAvgPrices[district] = {sumPrice: 0, count: 0};
+            }
+            districtsAvgPrices[district].sumPrice += apt.price;
+            districtsAvgPrices[district].count++;
+        });
+  
+      const avgPricesByDistrict = Object.keys(districtsAvgPrices).map(district => ({
+        district: district,
+        avgPrice: districtsAvgPrices[district].sumPrice / districtsAvgPrices[district].count,
+      }));
+  
+      // 3. Merging Data
+      const districtMap = {};
+      districtsData.forEach(d => districtMap[d.name_en] = d.name_ar);
+  
+      const avgPrices = geojsonData.features.map(feature => {
+        const districtNameEn = feature.properties.name;
+        const districtNameAr = districtMap[districtNameEn] || null;
+        const avgPrice = districtNameAr ? avgPricesByDistrict.find(item => item.district === districtNameAr)?.avgPrice || 0: 0;
+        return {
+          district: districtNameEn,
+          avgPrice: avgPrice,
+        };
+      });
+  
+      return { avgPrices };
+    } catch (error) {
+      console.error('Error fetching or processing data:', error);
+      return { avgPrices: [] };
+    }
+  };
+
+const MapComponent: React.FC = () => {
+  useEffect(() => {
+    const drawMap = async () => {
+      try {
+        const { avgPrices } = await processData();
+        // Initialize the map
+        const map = L.map('map').setView([24.79, 46.70], 8);
+
+        // Add a tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '© OpenStreetMap',
+        }).addTo(map);
+
+        // Create a GeoJSON layer
+        L.geoJSON(geojsonData, {
+          style: (feature: any) => {
+            const districtName = feature.properties.name as string;
+            const avgPrice = avgPrices.find(d => d.district === districtName)?.avgPrice || 0;
+            return {
+              fillColor: getColor(avgPrice),
+              weight: 2,
+              opacity: 1,
+              color: 'white',
+              dashArray: '3',
+              fillOpacity: 0.7,
+            };
+          },
+        }).addTo(map);
+      } catch (error) {
+        console.error("Error drawing map:", error);
+      }
+    };
+
+    drawMap();
+  }, []);
+
+  const getColor = (price: number): string => {
+    return price > 1000 ? '#800026'
+         : price > 500 ? '#BD0026'
+         : price > 200 ? '#E31A1C'
+         : price > 100 ? '#FC4E2A'
+         : price > 50 ? '#FD8D3C'
+         : price > 20 ? '#FEB24C'
+         : price > 10 ? '#FED976'
+         : '#FFEDA0';
+  };
+
+  return (
+    <div id="map" style={{ height: '500px' }}></div>
+  );
+};
+
+export default MapComponent;

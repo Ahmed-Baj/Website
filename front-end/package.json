@@ -12,7 +12,18 @@
   "dependencies": {
     "@astrojs/check": "^0.9.4",
     "astro": "^4.16.13",
+<<<<<<< HEAD
     "mapbox-gl": "^3.8.0",
+=======
+    "leaflet": "^1.9.4",
+    "papaparse": "^5.4.1",
+    "plotly.js": "^2.35.2",
+    "plotly.js-dist": "^2.35.2",
+    "react": "^18.3.1",
+>>>>>>> 2d03e364076c1fbce69e10dfb00553145f679e43
     "typescript": "^5.6.3"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.14"
   }
 }
